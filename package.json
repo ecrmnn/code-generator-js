@@ -1,7 +1,7 @@
 {
-  "name": "module-boilerplate",
+  "name": "code-generator-js",
   "version": "1.0.0",
-  "description": "Awesome sauce",
+  "description": "CLI for generating codes",
   "bin": {
     "code": "src/index.js"
   },
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ecrmnn/module-boilerplate"
+    "url": "https://github.com/ecrmnn/code-generator-js"
   },
   "keywords": [],
   "author": {
@@ -20,9 +20,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ecrmnn/module-boilerplate/issues"
+    "url": "https://github.com/ecrmnn/code-generator-js/issues"
   },
-  "homepage": "https://github.com/ecrmnn/module-boilerplate",
+  "homepage": "https://github.com/ecrmnn/code-generator-js",
   "devDependencies": {
     "chai": "^3.5.0",
     "execa": "^0.2.2",
