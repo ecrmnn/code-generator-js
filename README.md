@@ -27,7 +27,7 @@ When generating 100.000 codes Go performs 530 % faster than this implementation.
 
 ### Usage
 Generate a single code. (``codes.txt`` is saved in current directory)
-```javascript
+```bash
 code
 //=> Generated: 1/1 codes
 //=> Done. Codes saved to codes.txt
@@ -35,7 +35,7 @@ code
 ```
 
 Generate codes using a pattern (``l`` for letters. ``n`` for number. ``-`` or any character for dash)
-```javascript
+```bash
 code --pattern nnnn-llll
 //=> Generated: 1/1 codes
 //=> Done. Codes saved to codes.txt
@@ -43,7 +43,7 @@ code --pattern nnnn-llll
 ```
 
 Generate a thousand codes with ``nnnn-llll`` pattern
-```javascript
+```bash
 code --pattern nnnn-llll --length 1000
 //=> Generated: 1000/1000 codes
 //=> Done. Codes saved to codes.txt
@@ -51,7 +51,7 @@ code --pattern nnnn-llll --length 1000
 ```
 
 Generate a thousand uppercase codes with ``nnnn-llll`` pattern
-```javascript
+```bash
 code --pattern nnnn-llll --length 1000 --case upper
 //=> Generated: 1000/1000 codes
 //=> Done. Codes saved to codes.txt
