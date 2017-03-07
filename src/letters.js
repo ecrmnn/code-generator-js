@@ -1,8 +1,9 @@
 'use strict';
 
-const shuffle = require('./shuffle');
-const letters = 'abcjdefghijklmnpqrstuvwxyz'.split('');
+const letters = 'abcjdefghijklmnpqrstuvwxyz'.split('').map(char => char.charCodeAt(0));
+const len = letters.length;
 
 module.exports = function randomLetter() {
-  return shuffle(letters)[0];
+  const pos = Math.floor(Math.random() * len);
+  return letters[pos];
 }

@@ -4,13 +4,13 @@
 
 console.time('Generation took');
 
-const fs = require('fs');
-const path = require('path');
-const program = require('commander');
-const readline = require('readline');
-const pckg = require('../package.json');
-const randomLetter = require('./letters');
-const randomNumber = require('./numbers');
+var fs = require('fs');
+var path = require('path');
+var program = require('commander');
+var readline = require('readline');
+var pckg = require('../package.json');
+var randomLetter = require('./letters');
+var randomNumber = require('./numbers');
 
 program
   .version(pckg.version, '-v --version')
@@ -19,33 +19,35 @@ program
   .option('-c, --case <c>', 'Number of codes to generate [upper] [lower]', 'lower')
   .parse(process.argv);
 
-const codes = [];
+var codes = new Set();
+var chars = program.pattern;
+var charsLength = chars.length;
+var programLength = program.length;
+var upper = program.case === 'upper';
+for (var i = 0; i < programLength; i++) {
+  var code = new Array(charsLength);
 
-for (let i = 0; i < program.length; i++) {
-  let code = '';
-
-  program.pattern.split('').forEach(character => {
-    if (character === 'l') {
-      if (program.case === 'upper') {
-        code += randomLetter().toUpperCase();
+  for (var j = 0; j < charsLength; j++) {
+    var character = chars.charCodeAt(j);
+    if (character === 108) {
+      if (upper) {
+        code[j] = randomLetter() - 32;
       } else {
-        code += randomLetter();
+        code[j] = randomLetter();
       }
-    } else if (character === 'n') {
-      code += randomNumber();
+    } else if (character === 110) {
+      code[j] = randomNumber();
     } else {
-      code += '-';
+      code[j] = 45; // '-'
     }
-  });
-
-  if (codes.indexOf(code) === -1) {
-    codes.push(code);
+  }
+  if (codes.add(String.fromCharCode.apply(String, code))) {
     readline.cursorTo(process.stdout, 0);
-    process.stdout.write('Generated: ' + codes.length + '/' + program.length + ' codes');
+    process.stdout.write('Generated: ' + codes.size + '/' + program.length + ' codes');
   }
 }
 
-fs.writeFile('codes.txt', codes.join('\n'), function (err) {
+fs.writeFile('codes.txt', Array.from(codes).join('\n'), function (err) {
   if (err) {
     return console.log(err);
   }
