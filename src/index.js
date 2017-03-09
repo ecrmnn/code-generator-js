@@ -4,13 +4,14 @@
 
 console.time('Generation took');
 
-var fs = require('fs');
-var path = require('path');
-var program = require('commander');
-var readline = require('readline');
-var pckg = require('../package.json');
-var randomLetter = require('./letters');
-var randomNumber = require('./numbers');
+
+const fs = require('fs');
+const path = require('path');
+const program = require('commander');
+const readline = require('readline');
+const pckg = require('../package.json');
+const randomLetter = require('./letters');
+const randomNumber = require('./numbers');
 
 program
   .version(pckg.version, '-v --version')
@@ -19,35 +20,96 @@ program
   .option('-c, --case <c>', 'Number of codes to generate [upper] [lower]', 'lower')
   .parse(process.argv);
 
-var codes = new Set();
-var chars = program.pattern;
-var charsLength = chars.length;
-var programLength = program.length;
-var upper = program.case === 'upper';
-for (var i = 0; i < programLength; i++) {
-  var code = new Array(charsLength);
+const codes = new Set();
+const charsLength = program.pattern.length;
+const lines = new Array(charsLength);
 
+const programLength = program.length;
+const upper = program.case === 'upper';
+
+let buffer = new Buffer((charsLength + 1) * programLength);
+let offset = 0;
+
+let makeCode;
+
+if (programLength > 100) {
+  // it's worth making a dedicated function.
   for (var j = 0; j < charsLength; j++) {
-    var character = chars.charCodeAt(j);
+    var line;
+    var character = program.pattern.charCodeAt(j);
     if (character === 108) {
       if (upper) {
-        code[j] = randomLetter() - 32;
+        line = 'letter = randomLetter() - 32;';
       } else {
-        code[j] = randomLetter();
+        line = 'letter = randomLetter();';
       }
     } else if (character === 110) {
-      code[j] = randomNumber();
+      line = 'letter = randomNumber();';
     } else {
-      code[j] = 45; // '-'
+      line = 'letter = 45;'; // '-'`
     }
+    lines[j] = `
+      ${line}
+      buffer[offset++] = letter;
+      hash = ((hash << 5) - hash) + letter;
+      hash |= 0;
+    `;
   }
-  if (codes.add(String.fromCharCode.apply(String, code))) {
+  makeCode = new Function('buffer', 'offset', 'randomLetter', 'randomNumber', `
+    let hash = 0;
+    let letter = 0;
+    ${lines.join('\n')}
+    buffer[offset++] = 10;
+    return hash;
+  `);
+}
+else {
+  makeCode = function (buffer, offset, randomLetter, randomNumber) {
+    let hash = 0;
+    let letter = 0;
+    for (var j = 0; j < charsLength; j++) {
+      var line;
+      var character = program.pattern.charCodeAt(j);
+      if (character === 108) {
+        if (upper) {
+          letter = randomLetter() - 32;;
+        } else {
+          letter = randomLetter();;
+        }
+      } else if (character === 110) {
+        letter = randomNumber();;
+      } else {
+        letter = 45; // '-'
+      }
+      buffer[offset++] = letter;
+      hash = ((hash << 5) - hash) + letter;
+      hash |= 0;
+    }
+    buffer[offset++] = 10;
+    return hash;
+  };
+}
+
+
+for (var i = 0; i < programLength; i++) {
+  var hash = makeCode(buffer, offset, randomLetter, randomNumber);
+  if (codes.has(hash)) {
+    // try again.
+    i--;
+  }
+  else {
+    codes.add(hash);
+    offset += charsLength + 1;
     readline.cursorTo(process.stdout, 0);
-    process.stdout.write('Generated: ' + codes.size + '/' + program.length + ' codes');
+    process.stdout.write('Generated: ' + i + '/' + programLength + ' codes');
   }
 }
 
-fs.writeFile('codes.txt', Array.from(codes).join('\n'), function (err) {
+if (offset < buffer.length) {
+  buffer = buffer.slice(0, offset);
+}
+
+fs.writeFile('codes.txt', buffer, function (err) {
   if (err) {
     return console.log(err);
   }
