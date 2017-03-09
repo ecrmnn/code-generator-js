@@ -5,13 +5,13 @@
 console.time('Generation took');
 
 
-const fs = require('fs');
-const path = require('path');
-const program = require('commander');
-const readline = require('readline');
-const pckg = require('../package.json');
-const randomLetter = require('./letters');
-const randomNumber = require('./numbers');
+var fs = require('fs');
+var path = require('path');
+var program = require('commander');
+var readline = require('readline');
+var pckg = require('../package.json');
+var randomLetter = require('./letters');
+var randomNumber = require('./numbers');
 
 program
   .version(pckg.version, '-v --version')
@@ -21,18 +21,18 @@ program
   .option('-q, --quiet', 'When specified, does not log progress to the console when processing.')
   .parse(process.argv);
 
-const codes = new Set();
-const charsLength = program.pattern.length;
-const lines = new Array(charsLength);
+var codes = new Set();
+var charsLength = program.pattern.length;
+var lines = new Array(charsLength);
 
-const programLength = program.length;
-const upper = program.case === 'upper';
-const quiet = program.quiet;
+var programLength = program.length;
+var upper = program.case === 'upper';
+var quiet = program.quiet;
 
-let buffer = new Buffer((charsLength + 1) * programLength);
-let offset = 0;
+var buffer = new Buffer((charsLength + 1) * programLength);
+var offset = 0;
 
-let makeCode;
+var makeCode;
 
 if (programLength > 100) {
   // it's worth making a dedicated function.
@@ -59,27 +59,27 @@ if (programLength > 100) {
   }
   makeCode = new Function('buffer', 'offset', 'randomLetter', 'randomNumber', `
     'use strict';
-    let hash = 0;
-    let letter = 0;
+    var hash = 0;
+    var letter = 0;
     ${lines.join('\n')}
     return hash;
   `);
 }
 else {
-  makeCode = function (buffer, offset, randomLetter, randomNumber) {
-    let hash = 0;
-    let letter = 0;
+  makeCode = (buffer, offset, randomLetter, randomNumber) => {
+    var hash = 0;
+    var letter = 0;
     for (var j = 0; j < charsLength; j++) {
       var line;
       var character = program.pattern.charCodeAt(j);
       if (character === 108) {
         if (upper) {
-          letter = randomLetter() - 32;;
+          letter = randomLetter() - 32;
         } else {
-          letter = randomLetter();;
+          letter = randomLetter();
         }
       } else if (character === 110) {
-        letter = randomNumber();;
+        letter = randomNumber();
       } else {
         letter = 45; // '-'
       }
@@ -91,27 +91,48 @@ else {
   };
 }
 
-
-for (var i = 0; i < programLength; i++) {
-  var hash = makeCode(buffer, offset, randomLetter, randomNumber);
-  if (codes.has(hash)) {
-    // try again.
-    i--;
-  }
-  else {
-    codes.add(hash);
-    offset += charsLength;
-    if (i < programLength - 1) {
-      buffer[offset++] = 10;
+var run;
+if (quiet) {
+  run = function () {
+    for (var i = 0; i < programLength; i++) {
+      var hash = makeCode(buffer, offset, randomLetter, randomNumber);
+      if (codes.has(hash)) {
+        // try again.
+        i--;
+      }
+      else {
+        codes.add(hash);
+        offset += charsLength;
+        buffer[offset++] = 10;
+      }
     }
-    if (!quiet) {
-      readline.cursorTo(process.stdout, 0);
-      process.stdout.write('Generated: ' + (i + 1) + '/' + programLength + ' codes');
+  };
+}
+else {
+  run = function () {
+    for (var i = 0; i < programLength; i++) {
+      var hash = makeCode(buffer, offset, randomLetter, randomNumber);
+      if (codes.has(hash)) {
+        // try again.
+        i--;
+      }
+      else {
+        codes.add(hash);
+        offset += charsLength;
+        buffer[offset++] = 10;
+        readline.cursorTo(process.stdout, 0);
+        process.stdout.write('Generated: ' + (i + 1) + '/' + programLength + ' codes');
+      }
     }
-  }
+  };
 }
 
-if (offset < buffer.length) {
+run();
+
+// Remove the trailing newline.
+offset--;
+
+if (offset > 0 && offset < buffer.length) {
   buffer = buffer.slice(0, offset);
 }
 
