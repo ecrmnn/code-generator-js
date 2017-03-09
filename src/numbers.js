@@ -1,8 +1,5 @@
 'use strict';
 
-const shuffle = require('./shuffle');
-const numbers = '123456789'.split('');
-
-module.exports = function randomNumber() {
-  return shuffle(numbers)[0];
+module.exports = function randomLetter() {
+  return 49 + Math.floor(Math.random() * 9);
 }
