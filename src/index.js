@@ -18,6 +18,7 @@ program
   .option('-p, --pattern <p>', 'Code pattern l for letter, n for number and - for dash', 'll-nn-llnn')
   .option('-l, --length <l>', 'Number of codes to generate', 1)
   .option('-c, --case <c>', 'Number of codes to generate [upper] [lower]', 'lower')
+  .option('-q, --quiet', 'When specified, does not log progress to the console when processing.')
   .parse(process.argv);
 
 const codes = new Set();
@@ -26,6 +27,7 @@ const lines = new Array(charsLength);
 
 const programLength = program.length;
 const upper = program.case === 'upper';
+const quiet = program.quiet;
 
 let buffer = new Buffer((charsLength + 1) * programLength);
 let offset = 0;
@@ -100,8 +102,10 @@ for (var i = 0; i < programLength; i++) {
   else {
     codes.add(hash);
     offset += charsLength + 1;
-    readline.cursorTo(process.stdout, 0);
-    process.stdout.write('Generated: ' + i + '/' + programLength + ' codes');
+    if (!quiet) {
+      readline.cursorTo(process.stdout, 0);
+      process.stdout.write('Generated: ' + i + '/' + programLength + ' codes');
+    }
   }
 }
 
