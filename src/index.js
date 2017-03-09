@@ -58,6 +58,7 @@ if (programLength > 100) {
     `;
   }
   makeCode = new Function('buffer', 'offset', 'randomLetter', 'randomNumber', `
+    'use strict';
     let hash = 0;
     let letter = 0;
     ${lines.join('\n')}
