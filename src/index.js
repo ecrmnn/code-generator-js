@@ -61,7 +61,6 @@ if (programLength > 100) {
     let hash = 0;
     let letter = 0;
     ${lines.join('\n')}
-    buffer[offset++] = 10;
     return hash;
   `);
 }
@@ -87,7 +86,6 @@ else {
       hash = ((hash << 5) - hash) + letter;
       hash |= 0;
     }
-    buffer[offset++] = 10;
     return hash;
   };
 }
@@ -101,10 +99,13 @@ for (var i = 0; i < programLength; i++) {
   }
   else {
     codes.add(hash);
-    offset += charsLength + 1;
+    offset += charsLength;
+    if (i < programLength - 1) {
+      buffer[offset++] = 10;
+    }
     if (!quiet) {
       readline.cursorTo(process.stdout, 0);
-      process.stdout.write('Generated: ' + i + '/' + programLength + ' codes');
+      process.stdout.write('Generated: ' + (i + 1) + '/' + programLength + ' codes');
     }
   }
 }
